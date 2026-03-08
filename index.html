@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Copyright Detector</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            padding: 20px;
+            max-width: 100%;
+        }
+
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 24px;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .panel {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .panel h2 {
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .status {
+            padding: 12px;
+            background: #f0f0f0;
+            border-left: 4px solid #667eea;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            font-size: 14px;
+            color: #333;
+            min-height: 20px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            flex: 1;
+            min-width: 120px;
+            padding: 12px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+            border: 1px solid #ddd;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        .log-panel {
+            background: #1a1a1a;
+            color: #00ff00;
+            padding: 12px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+            line-height: 1.4;
+            margin-bottom: 10px;
+        }
+
+        .log-panel p {
+            margin: 2px 0;
+        }
+
+        .settings-input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 13px;
+            font-family: monospace;
+        }
+
+        .settings-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 6px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .checkbox-group label {
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        #mainPanel {
+            display: block;
+        }
+
+        #settingsPanel {
+            display: none;
+        }
+
+        .detected-items {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 10px;
+        }
+
+        .detected-item {
+            padding: 8px;
+            margin-bottom: 8px;
+            background: #f9fafb;
+            border-left: 3px solid #ef4444;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .detected-item.safe {
+            border-left-color: #10b981;
+        }
+
+        .info-text {
+            font-size: 12px;
+            color: #666;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- GŁÓWNY PANEL -->
+        <div id="mainPanel">
+            <!-- Header -->
+            <div class="header">
+                <h1>🎬 Copyright Detector</h1>
+                <p>AI-powered copyright detection dla Adobe Premiere Pro</p>
+            </div>
+
+            <!-- Status -->
+            <div class="panel">
+                <div id="status" class="status">Gotowy do skanowania</div>
+            </div>
+
+            <!-- Główne przyciski -->
+            <div class="panel">
+                <h2>🔍 Skanowanie</h2>
+                <div class="button-group">
+                    <button id="scanBtn" class="btn-primary">Skanuj Timeline</button>
+                    <button id="settingsBtn" class="btn-secondary">⚙️ Ustawienia</button>
+                </div>
+                <p class="info-text">
+                    Kliknij "Skanuj Timeline" aby przeanalizować wszystkie audio w aktywnym projekcie.
+                    Plugin wykryje muzykę z copyrightem za pomocą RapidAPI (Shazam).
+                </p>
+            </div>
+
+            <!-- Wykryte clipy -->
+            <div class="panel">
+                <h2>📋 Wykryte clipy</h2>
+                <div id="detectedList" class="detected-items">
+                    <p style="color: #999;">Brak analizy. Kliknij "Skanuj Timeline"</p>
+                </div>
+            </div>
+
+            <!-- Akcje -->
+            <div class="panel">
+                <h2>⚡ Akcje</h2>
+                <div class="button-group">
+                    <button class="btn-danger" onclick="removeAudio(0)">Usuń Audio</button>
+                    <button class="btn-success" onclick="replaceWithFreeMusic(0)">Zastąp Muzyką</button>
+                </div>
+            </div>
+
+            <!-- Logi -->
+            <div class="panel">
+                <h2>📝 Logi</h2>
+                <div id="logPanel" class="log-panel"></div>
+                <button id="clearLogsBtn" class="btn-secondary" style="width: 100%;">Wyczyść Logi</button>
+            </div>
+        </div>
+
+        <!-- PANEL USTAWIEŃ -->
+        <div id="settingsPanel">
+            <div class="header">
+                <h1>⚙️ Ustawienia</h1>
+                <p>Konfiguracja Copyright Detector</p>
+            </div>
+
+            <div class="panel">
+                <h2>RapidAPI - Shazam</h2>
+                <label class="settings-label">API Key:</label>
+                <input id="apiKeyInput" type="password" class="settings-input" placeholder="Wklej swój RapidAPI key">
+                <p class="info-text">
+                    Pobierz bezpłatny klucz z <strong>rapidapi.com</strong> → Shazam API
+                </p>
+            </div>
+
+            <div class="panel">
+                <h2>🎵 Folder z muzyką bez copyrightów</h2>
+                <label class="settings-label">Ścieżka do folderu:</label>
+                <input id="musicFolderInput" type="text" class="settings-input" placeholder="np. C:/MusicLibrary/FreeSongs" readonly>
+                <button id="selectFolderBtn" class="btn-secondary" style="width: 100%; margin-bottom: 10px;">Wybierz Folder</button>
+                <p class="info-text">
+                    Folder powinien zawierać pliki MP3/WAV które będą używane do zamiany.
+                </p>
+            </div>
+
+            <div class="panel">
+                <h2>🔧 Opcje</h2>
+                <div class="checkbox-group">
+                    <input id="logCheckbox" type="checkbox" checked>
+                    <label for="logCheckbox">Włącz logowanie</label>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="button-group">
+                    <button id="saveSettingsBtn" class="btn-primary" style="flex: 1;">💾 Zapisz Ustawienia</button>
+                    <button id="closeSettingsBtn" class="btn-secondary" style="flex: 1;">Zamknij</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Skrypty -->
+    <script src="js/ext.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
